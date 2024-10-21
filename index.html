@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Upload and Preview</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            padding: 20px;
+        }
+
+        #file-upload {
+            display: none;
+        }
+
+        .upload-container {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .button {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .thumbnail {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+            background: #fff;
+            padding: 10px;
+            border: 1px solid #ccc;
+        }
+
+        .thumbnail img {
+            max-width: 50px;
+            margin-right: 10px;
+        }
+
+        .remove-btn {
+            margin-left: auto;
+            cursor: pointer;
+            color: red;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            border: 1px solid #ccc;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f0f0f0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="upload-container">
+        <label for="file-upload" class="button">Browse Files</label>
+        <input type="file" id="file-upload" accept="image/*" multiple>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>File Name</th>
+                <th>Preview</th>
+                <th>Type</th>
+                <th>Size</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="thumbnail-list"></tbody>
+    </table>
+
+    <script>
+        const fileUpload = document.getElementById('file-upload');
+        const thumbnailList = document.getElementById('thumbnail-list');
+        let fileCount = 0;
+
+        fileUpload.addEventListener('change', (event) => {
+            const files = event.target.files;
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const reader = new FileReader();
+
+                reader.onload = (e) => {
+                    fileCount++;
+                    const sizeInKB = (file.size / 1024).toFixed(2) + ' KB';
+                    const fileType = file.type.split('/')[1].toUpperCase();
+
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                    <td>${fileCount}</td>
+                    <td>${file.name}</td>
+                    <td><img style="width:300px;" src="${e.target.result}" alt="${file.name}"></td>
+                    <td>${fileType}</td>
+                    <td>${sizeInKB}</td>
+                    <td><span class="remove-btn" onclick="removeImage(this)">✖</span></td>
+                `;
+                    thumbnailList.appendChild(row);
+                };
+
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function removeImage(element) {
+            const row = element.closest('tr');
+            thumbnailList.removeChild(row);
+            fileCount--; // Decrement the file count if needed
+            updateSerialNumbers();
+        }
+
+        function updateSerialNumbers() {
+            const rows = thumbnailList.querySelectorAll('tr');
+            rows.forEach((row, index) => {
+                row.cells[0].innerText = index + 1; // Update serial numbers
+            });
+        }
+    </script>
+
+</body>
+
+</html>
